@@ -1,0 +1,141 @@
+<section class="page-heading">
+  <div class="page-heading-wrapper">
+    <div class="container-fluid">
+      <div class="page-heading-inner">          
+        <div class="breadcrumb clearfix">
+          <span itemscope itemtype="http://data-vocabulary.org/Breadcrumb">
+            <a href="{{ shop.url }}" title="{{ shop.name | escape }}" itemprop="url">
+              <span itemprop="title">{{ 'general.breadcrumbs.home' | t }}</span>
+            </a>
+          </span>
+          <span class="arrow-space">/</span>
+          <span itemscope itemtype="http://data-vocabulary.org/Breadcrumb">
+            <a href="{{ page.url }}" title="{{ page.title }}" itemprop="url"><span itemprop="title">{{ page.title }}</span></a>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+{% if page.metafields.imagen.imagen %}
+  {% assign col1 = 8 %}
+  {% assign col2 = 4 %}
+{% else %}
+  {% assign col1 = 12 %}
+  {% assign col2 = 12 %}
+{% endif %}
+
+{%- assign expand_questions = section.settings.expand_questions -%}
+
+<div class="page-faqs-content">
+  <div class="page-content-wrapper">
+    <div class="container">
+      <div class="row d-flex">
+        <div class="col-sm-12 col-md-{{ col1 }}">
+          <div class="page-content-inner">
+            <div class="section-header text-center" style="display: none">
+              <h2>{{ page.title }}</h2>
+            </div>
+            <div class="main-content">
+              <div class="content-faqs">
+                <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+                  {%- for block in section.blocks -%}
+                  {%- case block.type -%}
+                    {%- when 'separator' -%}
+                      <h3 class="faq-separator" {{ block.shopify_attributes }}>{{ block.settings.title | escape }}</h3>
+              
+                    {%- when 'faqs' -%}
+                      <div class="panel panel-default">
+                        <div class="panel-heading" role="tab" id="heading{{ forloop.index }}">
+                          <h4 class="panel-title">
+                            <a class="collapsed" data-toggle="collapse" role="button" data-parent="#accordion" href="#collapse{{ forloop.index }}" aria-expanded="false" aria-controls="collapse{{ forloop.index }}">
+                              <span class="faq-icon"><i class="fa fa-question-circle"></i></span>
+                              {{block.settings.title}}
+                            </a>
+                          </h4>
+                        </div>
+                        <div id="collapse{{ forloop.index }}" class="panel-collapse collapse {% if expand_questions == true or block.settings.opened == true %}in{% endif %}" role="tabpanel" aria-labelledby="heading{{ forloop.index }}">
+                          <div class="panel-body">
+                            {{block.settings.answer}}
+                          </div>
+                        </div>
+                      </div>
+                  {%- endcase -%}
+                {%- endfor -%}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      
+        {% if page.metafields.imagen.imagen %}
+        <div class="hidden-xs hidden-sm col-md-{{ col2 }}" style="background: url({{ page.metafields.imagen.imagen }}) no-repeat; background-size: cover; background-position: center;">
+        </div>
+        {% endif %}
+
+      </div>
+    </div>
+  </div>
+</div>
+
+{% javascript %}
+  jQuery(function ($) {
+    var $active = $('#accordion .panel-collapse.in').prev().addClass('active');
+    $('#accordion').on('show.bs.collapse', function (e) {
+      $('#accordion .panel-heading.active').removeClass('active');
+      $(e.target).prev().addClass('active');
+    })
+  });
+{% endjavascript %}
+
+
+{% schema %}
+{
+  "name": "FAQs",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "expand_questions",
+      "label": "Expandir todas las preguntas por default",
+      "default": false
+    }
+  ],
+  "blocks": [
+      {
+        "type": "separator",
+        "name": "Section separator",
+        "settings": [
+          {
+            "type": "text",
+            "id": "title",
+            "label": "Heading"
+          }
+        ]
+      },    
+      {
+      "type": "faqs",
+      "name": "Faqs",
+      "settings": [
+          {
+          "type": "text",
+          "id": "title",
+          "label": "Question"
+          },
+          {
+          "type": "richtext",
+          "id": "answer",
+          "label": "Answer"
+          },
+          {
+            "type": "checkbox",
+            "id": "opened",
+            "label": "Abrir al cargar",
+            "default": false
+          }
+      ]
+      }
+  ]  
+}
+{% endschema %}
